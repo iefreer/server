@@ -302,6 +302,12 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 	protected $custom_data;
 
 	/**
+	 * The value for the type field.
+	 * @var        int
+	 */
+	protected $type;
+
+	/**
 	 * @var        array kshow[] Collection to store aggregation of kshow objects.
 	 */
 	protected $collkshows;
@@ -440,6 +446,26 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 	 * @var        Criteria The criteria used to select the current contents of collKuserToUserRoles.
 	 */
 	private $lastKuserToUserRoleCriteria = null;
+
+	/**
+	 * @var        array KuserGroup[] Collection to store aggregation of KuserGroup objects.
+	 */
+	protected $collKuserGroupsRelatedByGroupId;
+
+	/**
+	 * @var        Criteria The criteria used to select the current contents of collKuserGroupsRelatedByGroupId.
+	 */
+	private $lastKuserGroupRelatedByGroupIdCriteria = null;
+
+	/**
+	 * @var        array KuserGroup[] Collection to store aggregation of KuserGroup objects.
+	 */
+	protected $collKuserGroupsRelatedByKuserId;
+
+	/**
+	 * @var        Criteria The criteria used to select the current contents of collKuserGroupsRelatedByKuserId.
+	 */
+	private $lastKuserGroupRelatedByKuserIdCriteria = null;
 
 	/**
 	 * Flag to prevent endless save loop, if this object is referenced
@@ -1060,6 +1086,16 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 	public function getCustomData()
 	{
 		return $this->custom_data;
+	}
+
+	/**
+	 * Get the [type] column value.
+	 *
+	 * @return     int
+	 */
+	public function getType()
+	{
+		return $this->type;
 	}
 
 	/**
@@ -2199,6 +2235,29 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 	} // setCustomData()
 
 	/**
+	 * Set the value of [type] column.
+	 *
+	 * @param      int $v new value
+	 * @return     kuser The current object (for fluent API support)
+	 */
+	public function setType($v)
+	{
+		if(!isset($this->oldColumnsValues[kuserPeer::TYPE]))
+			$this->oldColumnsValues[kuserPeer::TYPE] = $this->type;
+
+		if ($v !== null) {
+			$v = (int) $v;
+		}
+
+		if ($this->type !== $v) {
+			$this->type = $v;
+			$this->modifiedColumns[] = kuserPeer::TYPE;
+		}
+
+		return $this;
+	} // setType()
+
+	/**
 	 * Indicates whether the columns in this object are only set to default values.
 	 *
 	 * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -2300,6 +2359,7 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 			$this->indexed_partner_data_int = ($row[$startcol + 43] !== null) ? (int) $row[$startcol + 43] : null;
 			$this->indexed_partner_data_string = ($row[$startcol + 44] !== null) ? (string) $row[$startcol + 44] : null;
 			$this->custom_data = ($row[$startcol + 45] !== null) ? (string) $row[$startcol + 45] : null;
+			$this->type = ($row[$startcol + 46] !== null) ? (int) $row[$startcol + 46] : null;
 			$this->resetModified();
 
 			$this->setNew(false);
@@ -2309,7 +2369,7 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 			}
 
 			// FIXME - using NUM_COLUMNS may be clearer.
-			return $startcol + 46; // 46 = kuserPeer::NUM_COLUMNS - kuserPeer::NUM_LAZY_LOAD_COLUMNS).
+			return $startcol + 47; // 47 = kuserPeer::NUM_COLUMNS - kuserPeer::NUM_LAZY_LOAD_COLUMNS).
 
 		} catch (Exception $e) {
 			throw new PropelException("Error populating kuser object", $e);
@@ -2414,6 +2474,12 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 
 			$this->collKuserToUserRoles = null;
 			$this->lastKuserToUserRoleCriteria = null;
+
+			$this->collKuserGroupsRelatedByGroupId = null;
+			$this->lastKuserGroupRelatedByGroupIdCriteria = null;
+
+			$this->collKuserGroupsRelatedByKuserId = null;
+			$this->lastKuserGroupRelatedByKuserIdCriteria = null;
 
 		} // if (deep)
 	}
@@ -2662,6 +2728,22 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 
 			if ($this->collKuserToUserRoles !== null) {
 				foreach ($this->collKuserToUserRoles as $referrerFK) {
+					if (!$referrerFK->isDeleted()) {
+						$affectedRows += $referrerFK->save($con);
+					}
+				}
+			}
+
+			if ($this->collKuserGroupsRelatedByGroupId !== null) {
+				foreach ($this->collKuserGroupsRelatedByGroupId as $referrerFK) {
+					if (!$referrerFK->isDeleted()) {
+						$affectedRows += $referrerFK->save($con);
+					}
+				}
+			}
+
+			if ($this->collKuserGroupsRelatedByKuserId !== null) {
+				foreach ($this->collKuserGroupsRelatedByKuserId as $referrerFK) {
 					if (!$referrerFK->isDeleted()) {
 						$affectedRows += $referrerFK->save($con);
 					}
@@ -2993,6 +3075,22 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 					}
 				}
 
+				if ($this->collKuserGroupsRelatedByGroupId !== null) {
+					foreach ($this->collKuserGroupsRelatedByGroupId as $referrerFK) {
+						if (!$referrerFK->validate($columns)) {
+							$failureMap = array_merge($failureMap, $referrerFK->getValidationFailures());
+						}
+					}
+				}
+
+				if ($this->collKuserGroupsRelatedByKuserId !== null) {
+					foreach ($this->collKuserGroupsRelatedByKuserId as $referrerFK) {
+						if (!$referrerFK->validate($columns)) {
+							$failureMap = array_merge($failureMap, $referrerFK->getValidationFailures());
+						}
+					}
+				}
+
 
 			$this->alreadyInValidation = false;
 		}
@@ -3164,6 +3262,9 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 			case 45:
 				return $this->getCustomData();
 				break;
+			case 46:
+				return $this->getType();
+				break;
 			default:
 				return null;
 				break;
@@ -3231,6 +3332,7 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 			$keys[43] => $this->getIndexedPartnerDataInt(),
 			$keys[44] => $this->getIndexedPartnerDataString(),
 			$keys[45] => $this->getCustomData(),
+			$keys[46] => $this->getType(),
 		);
 		return $result;
 	}
@@ -3400,6 +3502,9 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 			case 45:
 				$this->setCustomData($value);
 				break;
+			case 46:
+				$this->setType($value);
+				break;
 		} // switch()
 	}
 
@@ -3470,6 +3575,7 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 		if (array_key_exists($keys[43], $arr)) $this->setIndexedPartnerDataInt($arr[$keys[43]]);
 		if (array_key_exists($keys[44], $arr)) $this->setIndexedPartnerDataString($arr[$keys[44]]);
 		if (array_key_exists($keys[45], $arr)) $this->setCustomData($arr[$keys[45]]);
+		if (array_key_exists($keys[46], $arr)) $this->setType($arr[$keys[46]]);
 	}
 
 	/**
@@ -3527,6 +3633,7 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 		if ($this->isColumnModified(kuserPeer::INDEXED_PARTNER_DATA_INT)) $criteria->add(kuserPeer::INDEXED_PARTNER_DATA_INT, $this->indexed_partner_data_int);
 		if ($this->isColumnModified(kuserPeer::INDEXED_PARTNER_DATA_STRING)) $criteria->add(kuserPeer::INDEXED_PARTNER_DATA_STRING, $this->indexed_partner_data_string);
 		if ($this->isColumnModified(kuserPeer::CUSTOM_DATA)) $criteria->add(kuserPeer::CUSTOM_DATA, $this->custom_data);
+		if ($this->isColumnModified(kuserPeer::TYPE)) $criteria->add(kuserPeer::TYPE, $this->type);
 
 		return $criteria;
 	}
@@ -3683,6 +3790,8 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 
 		$copyObj->setCustomData($this->custom_data);
 
+		$copyObj->setType($this->type);
+
 
 		if ($deepCopy) {
 			// important: temporarily setNew(false) because this affects the behavior of
@@ -3770,6 +3879,18 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 			foreach ($this->getKuserToUserRoles() as $relObj) {
 				if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
 					$copyObj->addKuserToUserRole($relObj->copy($deepCopy));
+				}
+			}
+
+			foreach ($this->getKuserGroupsRelatedByGroupId() as $relObj) {
+				if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+					$copyObj->addKuserGroupRelatedByGroupId($relObj->copy($deepCopy));
+				}
+			}
+
+			foreach ($this->getKuserGroupsRelatedByKuserId() as $relObj) {
+				if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+					$copyObj->addKuserGroupRelatedByKuserId($relObj->copy($deepCopy));
 				}
 			}
 
@@ -6371,6 +6492,314 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 	}
 
 	/**
+	 * Clears out the collKuserGroupsRelatedByGroupId collection (array).
+	 *
+	 * This does not modify the database; however, it will remove any associated objects, causing
+	 * them to be refetched by subsequent calls to accessor method.
+	 *
+	 * @return     void
+	 * @see        addKuserGroupsRelatedByGroupId()
+	 */
+	public function clearKuserGroupsRelatedByGroupId()
+	{
+		$this->collKuserGroupsRelatedByGroupId = null; // important to set this to NULL since that means it is uninitialized
+	}
+
+	/**
+	 * Initializes the collKuserGroupsRelatedByGroupId collection (array).
+	 *
+	 * By default this just sets the collKuserGroupsRelatedByGroupId collection to an empty array (like clearcollKuserGroupsRelatedByGroupId());
+	 * however, you may wish to override this method in your stub class to provide setting appropriate
+	 * to your application -- for example, setting the initial array to the values stored in database.
+	 *
+	 * @return     void
+	 */
+	public function initKuserGroupsRelatedByGroupId()
+	{
+		$this->collKuserGroupsRelatedByGroupId = array();
+	}
+
+	/**
+	 * Gets an array of KuserGroup objects which contain a foreign key that references this object.
+	 *
+	 * If this collection has already been initialized with an identical Criteria, it returns the collection.
+	 * Otherwise if this kuser has previously been saved, it will retrieve
+	 * related KuserGroupsRelatedByGroupId from storage. If this kuser is new, it will return
+	 * an empty collection or the current collection, the criteria is ignored on a new object.
+	 *
+	 * @param      PropelPDO $con
+	 * @param      Criteria $criteria
+	 * @return     array KuserGroup[]
+	 * @throws     PropelException
+	 */
+	public function getKuserGroupsRelatedByGroupId($criteria = null, PropelPDO $con = null)
+	{
+		if ($criteria === null) {
+			$criteria = new Criteria(kuserPeer::DATABASE_NAME);
+		}
+		elseif ($criteria instanceof Criteria)
+		{
+			$criteria = clone $criteria;
+		}
+
+		if ($this->collKuserGroupsRelatedByGroupId === null) {
+			if ($this->isNew()) {
+			   $this->collKuserGroupsRelatedByGroupId = array();
+			} else {
+
+				$criteria->add(KuserGroupPeer::GROUP_ID, $this->id);
+
+				KuserGroupPeer::addSelectColumns($criteria);
+				$this->collKuserGroupsRelatedByGroupId = KuserGroupPeer::doSelect($criteria, $con);
+			}
+		} else {
+			// criteria has no effect for a new object
+			if (!$this->isNew()) {
+				// the following code is to determine if a new query is
+				// called for.  If the criteria is the same as the last
+				// one, just return the collection.
+
+
+				$criteria->add(KuserGroupPeer::GROUP_ID, $this->id);
+
+				KuserGroupPeer::addSelectColumns($criteria);
+				if (!isset($this->lastKuserGroupRelatedByGroupIdCriteria) || !$this->lastKuserGroupRelatedByGroupIdCriteria->equals($criteria)) {
+					$this->collKuserGroupsRelatedByGroupId = KuserGroupPeer::doSelect($criteria, $con);
+				}
+			}
+		}
+		$this->lastKuserGroupRelatedByGroupIdCriteria = $criteria;
+		return $this->collKuserGroupsRelatedByGroupId;
+	}
+
+	/**
+	 * Returns the number of related KuserGroup objects.
+	 *
+	 * @param      Criteria $criteria
+	 * @param      boolean $distinct
+	 * @param      PropelPDO $con
+	 * @return     int Count of related KuserGroup objects.
+	 * @throws     PropelException
+	 */
+	public function countKuserGroupsRelatedByGroupId(Criteria $criteria = null, $distinct = false, PropelPDO $con = null)
+	{
+		if ($criteria === null) {
+			$criteria = new Criteria(kuserPeer::DATABASE_NAME);
+		} else {
+			$criteria = clone $criteria;
+		}
+
+		if ($distinct) {
+			$criteria->setDistinct();
+		}
+
+		$count = null;
+
+		if ($this->collKuserGroupsRelatedByGroupId === null) {
+			if ($this->isNew()) {
+				$count = 0;
+			} else {
+
+				$criteria->add(KuserGroupPeer::GROUP_ID, $this->id);
+
+				$count = KuserGroupPeer::doCount($criteria, false, $con);
+			}
+		} else {
+			// criteria has no effect for a new object
+			if (!$this->isNew()) {
+				// the following code is to determine if a new query is
+				// called for.  If the criteria is the same as the last
+				// one, just return count of the collection.
+
+
+				$criteria->add(KuserGroupPeer::GROUP_ID, $this->id);
+
+				if (!isset($this->lastKuserGroupRelatedByGroupIdCriteria) || !$this->lastKuserGroupRelatedByGroupIdCriteria->equals($criteria)) {
+					$count = KuserGroupPeer::doCount($criteria, false, $con);
+				} else {
+					$count = count($this->collKuserGroupsRelatedByGroupId);
+				}
+			} else {
+				$count = count($this->collKuserGroupsRelatedByGroupId);
+			}
+		}
+		return $count;
+	}
+
+	/**
+	 * Method called to associate a KuserGroup object to this object
+	 * through the KuserGroup foreign key attribute.
+	 *
+	 * @param      KuserGroup $l KuserGroup
+	 * @return     void
+	 * @throws     PropelException
+	 */
+	public function addKuserGroupRelatedByGroupId(KuserGroup $l)
+	{
+		if ($this->collKuserGroupsRelatedByGroupId === null) {
+			$this->initKuserGroupsRelatedByGroupId();
+		}
+		if (!in_array($l, $this->collKuserGroupsRelatedByGroupId, true)) { // only add it if the **same** object is not already associated
+			array_push($this->collKuserGroupsRelatedByGroupId, $l);
+			$l->setkuserRelatedByGroupId($this);
+		}
+	}
+
+	/**
+	 * Clears out the collKuserGroupsRelatedByKuserId collection (array).
+	 *
+	 * This does not modify the database; however, it will remove any associated objects, causing
+	 * them to be refetched by subsequent calls to accessor method.
+	 *
+	 * @return     void
+	 * @see        addKuserGroupsRelatedByKuserId()
+	 */
+	public function clearKuserGroupsRelatedByKuserId()
+	{
+		$this->collKuserGroupsRelatedByKuserId = null; // important to set this to NULL since that means it is uninitialized
+	}
+
+	/**
+	 * Initializes the collKuserGroupsRelatedByKuserId collection (array).
+	 *
+	 * By default this just sets the collKuserGroupsRelatedByKuserId collection to an empty array (like clearcollKuserGroupsRelatedByKuserId());
+	 * however, you may wish to override this method in your stub class to provide setting appropriate
+	 * to your application -- for example, setting the initial array to the values stored in database.
+	 *
+	 * @return     void
+	 */
+	public function initKuserGroupsRelatedByKuserId()
+	{
+		$this->collKuserGroupsRelatedByKuserId = array();
+	}
+
+	/**
+	 * Gets an array of KuserGroup objects which contain a foreign key that references this object.
+	 *
+	 * If this collection has already been initialized with an identical Criteria, it returns the collection.
+	 * Otherwise if this kuser has previously been saved, it will retrieve
+	 * related KuserGroupsRelatedByKuserId from storage. If this kuser is new, it will return
+	 * an empty collection or the current collection, the criteria is ignored on a new object.
+	 *
+	 * @param      PropelPDO $con
+	 * @param      Criteria $criteria
+	 * @return     array KuserGroup[]
+	 * @throws     PropelException
+	 */
+	public function getKuserGroupsRelatedByKuserId($criteria = null, PropelPDO $con = null)
+	{
+		if ($criteria === null) {
+			$criteria = new Criteria(kuserPeer::DATABASE_NAME);
+		}
+		elseif ($criteria instanceof Criteria)
+		{
+			$criteria = clone $criteria;
+		}
+
+		if ($this->collKuserGroupsRelatedByKuserId === null) {
+			if ($this->isNew()) {
+			   $this->collKuserGroupsRelatedByKuserId = array();
+			} else {
+
+				$criteria->add(KuserGroupPeer::KUSER_ID, $this->id);
+
+				KuserGroupPeer::addSelectColumns($criteria);
+				$this->collKuserGroupsRelatedByKuserId = KuserGroupPeer::doSelect($criteria, $con);
+			}
+		} else {
+			// criteria has no effect for a new object
+			if (!$this->isNew()) {
+				// the following code is to determine if a new query is
+				// called for.  If the criteria is the same as the last
+				// one, just return the collection.
+
+
+				$criteria->add(KuserGroupPeer::KUSER_ID, $this->id);
+
+				KuserGroupPeer::addSelectColumns($criteria);
+				if (!isset($this->lastKuserGroupRelatedByKuserIdCriteria) || !$this->lastKuserGroupRelatedByKuserIdCriteria->equals($criteria)) {
+					$this->collKuserGroupsRelatedByKuserId = KuserGroupPeer::doSelect($criteria, $con);
+				}
+			}
+		}
+		$this->lastKuserGroupRelatedByKuserIdCriteria = $criteria;
+		return $this->collKuserGroupsRelatedByKuserId;
+	}
+
+	/**
+	 * Returns the number of related KuserGroup objects.
+	 *
+	 * @param      Criteria $criteria
+	 * @param      boolean $distinct
+	 * @param      PropelPDO $con
+	 * @return     int Count of related KuserGroup objects.
+	 * @throws     PropelException
+	 */
+	public function countKuserGroupsRelatedByKuserId(Criteria $criteria = null, $distinct = false, PropelPDO $con = null)
+	{
+		if ($criteria === null) {
+			$criteria = new Criteria(kuserPeer::DATABASE_NAME);
+		} else {
+			$criteria = clone $criteria;
+		}
+
+		if ($distinct) {
+			$criteria->setDistinct();
+		}
+
+		$count = null;
+
+		if ($this->collKuserGroupsRelatedByKuserId === null) {
+			if ($this->isNew()) {
+				$count = 0;
+			} else {
+
+				$criteria->add(KuserGroupPeer::KUSER_ID, $this->id);
+
+				$count = KuserGroupPeer::doCount($criteria, false, $con);
+			}
+		} else {
+			// criteria has no effect for a new object
+			if (!$this->isNew()) {
+				// the following code is to determine if a new query is
+				// called for.  If the criteria is the same as the last
+				// one, just return count of the collection.
+
+
+				$criteria->add(KuserGroupPeer::KUSER_ID, $this->id);
+
+				if (!isset($this->lastKuserGroupRelatedByKuserIdCriteria) || !$this->lastKuserGroupRelatedByKuserIdCriteria->equals($criteria)) {
+					$count = KuserGroupPeer::doCount($criteria, false, $con);
+				} else {
+					$count = count($this->collKuserGroupsRelatedByKuserId);
+				}
+			} else {
+				$count = count($this->collKuserGroupsRelatedByKuserId);
+			}
+		}
+		return $count;
+	}
+
+	/**
+	 * Method called to associate a KuserGroup object to this object
+	 * through the KuserGroup foreign key attribute.
+	 *
+	 * @param      KuserGroup $l KuserGroup
+	 * @return     void
+	 * @throws     PropelException
+	 */
+	public function addKuserGroupRelatedByKuserId(KuserGroup $l)
+	{
+		if ($this->collKuserGroupsRelatedByKuserId === null) {
+			$this->initKuserGroupsRelatedByKuserId();
+		}
+		if (!in_array($l, $this->collKuserGroupsRelatedByKuserId, true)) { // only add it if the **same** object is not already associated
+			array_push($this->collKuserGroupsRelatedByKuserId, $l);
+			$l->setkuserRelatedByKuserId($this);
+		}
+	}
+
+	/**
 	 * Resets all collections of referencing foreign keys.
 	 *
 	 * This method is a user-space workaround for PHP's inability to garbage collect objects
@@ -6452,6 +6881,16 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 					$o->clearAllReferences($deep);
 				}
 			}
+			if ($this->collKuserGroupsRelatedByGroupId) {
+				foreach ((array) $this->collKuserGroupsRelatedByGroupId as $o) {
+					$o->clearAllReferences($deep);
+				}
+			}
+			if ($this->collKuserGroupsRelatedByKuserId) {
+				foreach ((array) $this->collKuserGroupsRelatedByKuserId as $o) {
+					$o->clearAllReferences($deep);
+				}
+			}
 		} // if ($deep)
 
 		$this->collkshows = null;
@@ -6468,6 +6907,8 @@ abstract class Basekuser extends BaseObject  implements Persistent {
 		$this->collcategoryKusers = null;
 		$this->collUploadTokens = null;
 		$this->collKuserToUserRoles = null;
+		$this->collKuserGroupsRelatedByGroupId = null;
+		$this->collKuserGroupsRelatedByKuserId = null;
 	}
 
 	/* ---------------------- CustomData functions ------------------------- */
